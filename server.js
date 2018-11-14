@@ -5,13 +5,15 @@ const http = require('http'),
 
 var pass = process.argv[2];
 if (pass == null) {throw "Please use: node server.js <userpassword>"}
+
+// bcrypt is more time consuming than crypto but is much safer for user passwords since these are more important than messages
 var hashedpass = '';
 bcrypt.hash(pass, 5, (err, pass) => hashedpass = pass);
-
 var signedmsg, publicKey;
 
 // Create server to respond to post requests
 server = http.createServer((req,res) => {
+    // Use path to decide what command to run
     var path = url.parse(req.url).pathname;
     let body = [];
     req.on('error', (err) => {
@@ -27,6 +29,7 @@ server = http.createServer((req,res) => {
                 if (path == '/storepub') {
                     publicKey = body.publicKey;
                     res.write("Public Key added");
+                // Allow user to store a signed message
                 } else if (path == '/signmessage') {
                     signedmsg = body.signedmsg;
                     res.write("Message signed");

@@ -35,20 +35,18 @@ function sendRequest(path, body) {
     request.end();
 }
 
+// Only signmessage performs client-side message signing since we do not want to send private keys ever
 // Execute request based on cmd arguments
 function main(cmd, pass, msg, key) {
     if (cmd == '--storepub') {
         var body = JSON.stringify({password: pass, publicKey: key});
         sendRequest("/storepub", body);
     } else if (cmd == '--signmessage') {
-
         var signer = crypto.createSign('sha256');
         signer.update(msg);
         var signedmessage = signer.sign(key, 'base64');
-
         var body = JSON.stringify({password: pass, signedmsg: signedmessage});
         sendRequest("/signmessage", body);
-        
     } else if (cmd == '--checkmessage') {
         var body = JSON.stringify({password: pass, message: msg});
         sendRequest("/checkmessage", body);
@@ -57,7 +55,8 @@ function main(cmd, pass, msg, key) {
     }
 }
 
-// parse arguments
+// Simple arguments with no flags were used for simplicity
+// Parse arguments
 var cmd = process.argv[2];
 var pass = process.argv[3];
 var msg = process.argv[4];
